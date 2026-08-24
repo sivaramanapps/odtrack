@@ -62,14 +62,10 @@ def owned_account(account_id: UUID, user: User, db: Session) -> Account:
 
 @app.on_event("startup")
 def create_tables() -> None:
-    Base.metadata.create_all(bind=engine)
-    with engine.begin() as connection:
-        connection.execute(text("ALTER TABLE accounts ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP"))
-    with SessionLocal() as db:
-        for account in db.scalars(select(Account)):
-            if not db.scalar(select(AccountRateHistory).where(AccountRateHistory.account_id == account.id)):
-                db.add(AccountRateHistory(account_id=account.id, effective_date=account.created_at.date(), interest_rate=account.interest_rate * 100, penal_rate=account.penal_rate * 100))
-        db.commit()
+    # Serverless startup must not run schema bootstrap against Supabase.
+    # Tables are provisioned manually before deployment, and create_all() can
+    # block the cold start path during Vercel invocation.
+    pass
 
 
 @app.get("/health")

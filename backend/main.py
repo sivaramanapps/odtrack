@@ -62,7 +62,7 @@ def owned_account(account_id: UUID, user: User, db: Session) -> Account:
 
 @app.on_event("startup")
 def create_tables() -> None:
-    Base.metadata.create_all(bind=engine)
+    #Base.metadata.create_all(bind=engine)
     with engine.begin() as connection:
         connection.execute(text("ALTER TABLE accounts ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP"))
     with SessionLocal() as db:

@@ -1,0 +1,10 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "command": true,
+        "docker compose": true,
+        "/^python3 -m py_compile /home/adminu/sivaramanapps_project/odtrack/backend/\\*\\.py && git -C /home/adminu/sivaramanapps_project/odtrack status --short$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

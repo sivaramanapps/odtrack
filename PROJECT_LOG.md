@@ -37,9 +37,12 @@ Create a multi-account overdraft ledger matching strict banking accrual rules (1
 * [2026-08-24 19:10] VERIFY: Backend compilation, floating-rate transition and granular transaction smoke test, frontend Docker/Vite build, editor diagnostics, and Compose validation passed.
 * [2026-08-24 19:12] HARDEN: Preserving legacy `debit`/`credit` transaction aliases in the new validation boundary to keep existing client transaction chains writable.
 * [2026-08-24 19:15] VERIFY: Backend image build and container-native schema validation passed; frontend image build and editor diagnostics passed. Host Python dependency import was unavailable, so runtime validation was performed inside the production backend image.
+* [2026-08-24 19:20] HOTFIX REQUEST: Register Vercel serverless PostgreSQL driver migration from psycopg to pure-Python pg8000, including SQLAlchemy URL normalization.
+* [2026-08-24 19:25] HOTFIX COMPLETE: Replaced psycopg dependency with pg8000, normalized `postgresql://` and `postgres://` URLs to the pg8000 SQLAlchemy dialect, and aligned the local Compose `.env` connection.
+* [2026-08-24 19:26] VERIFY: Backend image build, Python compilation, stale-driver scan, and in-container URL normalization check passed.
 
 ## 📍 Execution State Boundary
 - **Completed Since Inception**: Historical floating rates, granular transaction architecture, corrected financial metrics, migration hardening, and focused verification.
-- **Interrupted / Left Off At**: Enhancement and compatibility hardening complete.
-- **Immediate Next Imperative Step**: Restart the complete stack with `docker compose up -d` from the project root.
+- **Interrupted / Left Off At**: Vercel pg8000 driver hotfix complete and ready to publish.
+- **Immediate Next Imperative Step**: Commit and push the hotfix to `origin/master`.
 created vercel.json file

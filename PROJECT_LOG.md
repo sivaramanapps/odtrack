@@ -42,6 +42,8 @@ Create a multi-account overdraft ledger matching strict banking accrual rules (1
 * [2026-08-24 19:26] VERIFY: Backend image build, Python compilation, stale-driver scan, and in-container URL normalization check passed.
 * [2026-08-24 20:00] HOTFIX: Disabled startup schema bootstrap in the FastAPI lifecycle because the Supabase tables are already provisioned and startup-time `create_all()` freezes the Vercel serverless boot path.
 * [2026-08-24 20:05] VERIFY: Backend file compiles cleanly after disabling the startup hook; repository is ready for the final master-branch commit and push.
+* [2026-08-24 20:15] HOTFIX: Added the root-level `main.py` Vercel entrypoint and package-safe imports so the rewrite to `/main.py` resolves correctly when the backend is deployed from the repo root.
+* [2026-08-24 20:20] VERIFY: Local app import and backend compile pass with the Vercel-compatible wrapper entrypoint.
 
 ## 📍 Execution State Boundary
 - **Completed Since Inception**: Historical floating rates, granular transaction architecture, corrected financial metrics, migration hardening, and focused verification.

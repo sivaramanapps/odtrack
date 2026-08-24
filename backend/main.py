@@ -9,13 +9,19 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
-from sqlalchemy import select, text
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from database import Base, SessionLocal, engine, get_db
-from engine import LedgerEvent, RatePoint, calculate_ledger
-from models import Account, AccountRateHistory, Transaction, User
-from schemas import AccountCreate, AccountResponse, RateHistoryCreate, RateHistoryResponse, SessionRequest, SummaryResponse, TokenResponse, TransactionCreate, TransactionResponse
+try:
+    from database import Base, SessionLocal, engine, get_db
+    from engine import LedgerEvent, RatePoint, calculate_ledger
+    from models import Account, AccountRateHistory, Transaction, User
+    from schemas import AccountCreate, AccountResponse, RateHistoryCreate, RateHistoryResponse, SessionRequest, SummaryResponse, TokenResponse, TransactionCreate, TransactionResponse
+except ModuleNotFoundError:  # pragma: no cover - supports package-loading from the repo root
+    from backend.database import Base, SessionLocal, engine, get_db
+    from backend.engine import LedgerEvent, RatePoint, calculate_ledger
+    from backend.models import Account, AccountRateHistory, Transaction, User
+    from backend.schemas import AccountCreate, AccountResponse, RateHistoryCreate, RateHistoryResponse, SessionRequest, SummaryResponse, TokenResponse, TransactionCreate, TransactionResponse
 
 JWT_SECRET = os.getenv("JWT_SECRET", "development-only-secret")
 JWT_ALGORITHM = "HS256"

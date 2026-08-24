@@ -42,3 +42,4 @@ Create a multi-account overdraft ledger matching strict banking accrual rules (1
 - **Completed Since Inception**: Historical floating rates, granular transaction architecture, corrected financial metrics, migration hardening, and focused verification.
 - **Interrupted / Left Off At**: Enhancement and compatibility hardening complete.
 - **Immediate Next Imperative Step**: Restart the complete stack with `docker compose up -d` from the project root.
+created vercel.json file

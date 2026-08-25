@@ -78,6 +78,21 @@ def create_tables() -> None:
 def health() -> dict[str, str]:
     return {"status": "ok"}
 
+@app.get("/debug/db")
+def debug_db(db: Session = Depends(get_db)) -> dict:
+    from sqlalchemy import text
+
+    result = db.execute(
+        text("""
+            SELECT
+                current_database() AS database,
+                current_schema() AS schema,
+                current_setting('server_version') AS postgres_version
+        """)
+    ).mappings().one()
+
+    return dict(result)
+
 
 @app.post("/auth/session", response_model=TokenResponse)
 def create_session(request: SessionRequest, db: Session = Depends(get_db)) -> TokenResponse:

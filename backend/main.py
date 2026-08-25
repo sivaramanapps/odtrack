@@ -87,11 +87,18 @@ def debug_db(db: Session = Depends(get_db)) -> dict:
             SELECT
                 current_database() AS database,
                 current_schema() AS schema,
-                current_setting('server_version') AS postgres_version
+                (
+                    SELECT character_maximum_length
+                    FROM information_schema.columns
+                    WHERE table_schema = 'public'
+                      AND table_name = 'transactions'
+                      AND column_name = 'type'
+                ) AS transaction_type_length
         """)
     ).mappings().one()
 
     return dict(result)
+
 
 
 @app.post("/auth/session", response_model=TokenResponse)

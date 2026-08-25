@@ -48,7 +48,7 @@ class Transaction(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     account_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("accounts.id", ondelete="CASCADE"), index=True)
     effective_date: Mapped[date] = mapped_column(Date, index=True)
-    type: Mapped[str] = mapped_column(String(16))
+    type: Mapped[str] = mapped_column(String(32))
     amount: Mapped[Decimal] = mapped_column(Numeric(18, 2))
     account: Mapped[Account] = relationship(back_populates="transactions")
 

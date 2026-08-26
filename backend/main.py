@@ -121,14 +121,28 @@ def list_accounts(user: User = Depends(current_user), db: Session = Depends(get_
 
 
 @app.post("/accounts", response_model=AccountResponse, status_code=201)
-def create_account(request: AccountCreate, user: User = Depends(current_user), db: Session = Depends(get_db)) -> Account:
+def create_account(
+    request: AccountCreate,
+    user: User = Depends(current_user),
+    db: Session = Depends(get_db),
+) -> Account:
     account = Account(user_id=user.id, **request.model_dump())
     db.add(account)
+    db.flush()
+
+    db.add(
+        AccountRateHistory(
+            account_id=account.id,
+            effective_date=account.created_at.date(),
+            interest_rate=account.interest_rate * 100,
+            penal_rate=account.penal_rate * 100,
+        )
+    )
+
     db.commit()
     db.refresh(account)
-    db.add(AccountRateHistory(account_id=account.id, effective_date=account.created_at.date(), interest_rate=account.interest_rate * 100, penal_rate=account.penal_rate * 100))
-    db.commit()
     return account
+
 
 
 @app.get("/accounts/{account_id}/rates", response_model=list[RateHistoryResponse])

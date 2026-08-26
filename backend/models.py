@@ -1,12 +1,12 @@
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from decimal import Decimal
 
 from sqlalchemy import Date, DateTime, ForeignKey, Numeric, String, Text, CheckConstraint, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from database import Base
+from backend.database import Base
 
 
 class User(Base):
@@ -29,7 +29,11 @@ class Account(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     label: Mapped[str] = mapped_column(String(120))
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+        )
     sanctioned_limit: Mapped[Decimal] = mapped_column(Numeric(18, 2), default=Decimal("0.00"))
     interest_rate: Mapped[Decimal] = mapped_column(Numeric(8, 6), default=Decimal("0.109500"), nullable=False)
     penal_rate: Mapped[Decimal] = mapped_column(Numeric(8, 6), default=Decimal("0.080000"), nullable=False)

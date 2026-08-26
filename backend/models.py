@@ -6,7 +6,10 @@ from sqlalchemy import Date, DateTime, ForeignKey, Numeric, String, Text, CheckC
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.database import Base
+try:
+    from backend.database import Base
+except ModuleNotFoundError:
+    from database import Base
 
 
 class User(Base):

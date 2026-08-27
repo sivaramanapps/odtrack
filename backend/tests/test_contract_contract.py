@@ -57,6 +57,20 @@ def test_account_precision_is_rejected_when_too_many_decimal_places() -> None:
         )
 
 
+@pytest.mark.parametrize("field", ["interest_rate", "penal_rate"])
+def test_account_rate_must_be_a_decimal_fraction(field: str) -> None:
+    payload = {
+        "label": "Primary",
+        "sanctioned_limit": "1250.50",
+        "interest_rate": "0.1095",
+        "penal_rate": "0.08",
+    }
+    payload[field] = "1.000001"
+
+    with pytest.raises(ValidationError):
+        AccountCreate.model_validate(payload)
+
+
 def test_transaction_amount_accepts_cents() -> None:
     tx = TransactionCreate.model_validate(
         {

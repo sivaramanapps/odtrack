@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime, timezone
 from decimal import Decimal
 
-from sqlalchemy import Date, DateTime, ForeignKey, Numeric, String, Text, CheckConstraint, UniqueConstraint
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Numeric, String, Text, CheckConstraint, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -18,15 +18,21 @@ class User(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     username: Mapped[str] = mapped_column(String(80), unique=True, index=True)
     pin_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    is_view_only: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    created_by_user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_approved: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    account_limit: Mapped[int] = mapped_column(nullable=True)
     accounts: Mapped[list["Account"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    memberships: Mapped[list["AccountMember"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
 
 class Account(Base):
     __tablename__ = "accounts"
     __table_args__ = (
         CheckConstraint("sanctioned_limit >= 0", name="ck_account_limit_nonnegative"),
-        CheckConstraint("interest_rate >= 0", name="ck_account_interest_rate_nonnegative"),
-        CheckConstraint("penal_rate >= 0", name="ck_account_penal_rate_nonnegative"),
+        CheckConstraint("interest_rate >= 0 AND interest_rate <= 1", name="ck_account_interest_rate_fraction"),
+        CheckConstraint("penal_rate >= 0 AND penal_rate <= 1", name="ck_account_penal_rate_fraction"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -43,13 +49,33 @@ class Account(Base):
     user: Mapped[User] = relationship(back_populates="accounts")
     transactions: Mapped[list["Transaction"]] = relationship(back_populates="account", cascade="all, delete-orphan")
     rate_history: Mapped[list["AccountRateHistory"]] = relationship(back_populates="account", cascade="all, delete-orphan")
+    members: Mapped[list["AccountMember"]] = relationship(back_populates="account", cascade="all, delete-orphan")
+
+
+class AccountMember(Base):
+    __tablename__ = "account_members"
+    __table_args__ = (UniqueConstraint("account_id", "user_id", name="uq_account_member"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    account_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("accounts.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    role: Mapped[str] = mapped_column(String(16), default="viewer", nullable=False)
+    account: Mapped[Account] = relationship(back_populates="members")
+    user: Mapped[User] = relationship(back_populates="memberships")
+
+
+class AppSetting(Base):
+    __tablename__ = "app_settings"
+
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    value: Mapped[str] = mapped_column(String(256), nullable=False)
 
 
 class Transaction(Base):
     __tablename__ = "transactions"
     __table_args__ = (
         CheckConstraint("amount > 0", name="ck_transaction_amount_positive"),
-        CheckConstraint("type IN ('withdrawal', 'principal_repayment', 'interest_payment', 'penalty_payment', 'bank_penalty', 'incidental_charge', 'debit', 'credit')", name="ck_transaction_type"),
+        CheckConstraint("type IN ('withdrawal', 'principal_repayment', 'interest_payment', 'penalty_payment', 'bank_penalty', 'penalty_waiver', 'incidental_charge', 'debit', 'credit')", name="ck_transaction_type"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -62,7 +88,11 @@ class Transaction(Base):
 
 class AccountRateHistory(Base):
     __tablename__ = "account_rate_history"
-    __table_args__ = (UniqueConstraint("account_id", "effective_date", name="uq_account_rate_effective_date"),)
+    __table_args__ = (
+        UniqueConstraint("account_id", "effective_date", name="uq_account_rate_effective_date"),
+        CheckConstraint("interest_rate >= 0 AND interest_rate <= 100", name="ck_rate_history_interest_percent"),
+        CheckConstraint("penal_rate >= 0 AND penal_rate <= 100", name="ck_rate_history_penal_percent"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     account_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("accounts.id", ondelete="CASCADE"), index=True)

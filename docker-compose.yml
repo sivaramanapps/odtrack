@@ -19,6 +19,9 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       JWT_SECRET: ${JWT_SECRET}
       CORS_ORIGINS: ${CORS_ORIGINS}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PIN: ${ADMIN_PIN}
+      REGISTRATION_ENABLED: ${REGISTRATION_ENABLED}
     depends_on:
       postgres:
         condition: service_healthy

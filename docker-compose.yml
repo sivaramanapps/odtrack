@@ -22,6 +22,7 @@ services:
       ADMIN_USERNAME: ${ADMIN_USERNAME}
       ADMIN_PIN: ${ADMIN_PIN}
       REGISTRATION_ENABLED: ${REGISTRATION_ENABLED}
+      CREATE_TABLES_ON_STARTUP: ${CREATE_TABLES_ON_STARTUP}
     depends_on:
       postgres:
         condition: service_healthy

@@ -91,6 +91,9 @@ def admin_user(user: User = Depends(current_user)) -> User:
 
 @app.on_event("startup")
 def create_tables() -> None:
+    if os.getenv("CREATE_TABLES_ON_STARTUP", "false").lower() == "true":
+        # This is a convenience for local development and testing. In production, the database schema should be managed via migrations.
+        Base.metadata.create_all(bind=engine)
     # Serverless startup must not run schema bootstrap against Supabase.
     # Tables are provisioned manually before deployment, and create_all() can
     # block the cold start path during Vercel invocation.

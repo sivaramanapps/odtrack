@@ -416,7 +416,7 @@ def account_summary(account_id: UUID, user: User = Depends(current_user), db: Se
     rates = [RatePoint(item.effective_date, item.interest_rate, item.penal_rate) for item in account.rate_history]
     result = calculate_ledger(events, account.sanctioned_limit, rates)
     result["net_cost"] = result["total_interest_accrued"] + result["total_penalties_charged"] + result["incidental_charges"]
-    result["net_cost"] += result["bank_charges"]
+    #result["net_cost"] += result["bank_charges"]
     result["total_outstanding"] = max(
         result["principal"] + result["accrued_interest"] + result["penalty_balance"] + result["bank_charge_balance"] - result["credit_balance"],
         Decimal("0"),
